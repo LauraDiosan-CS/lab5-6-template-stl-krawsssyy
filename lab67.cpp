@@ -1,13 +1,16 @@
-
-#include <iostream>
 #include "tests.h"
+#include "ui.h"
 
-int main()
-{
+int main() {
     testBooks();
     testRepo();
-    std::cout << "Hello World!\n";
+    testService();
+    Repo<Book> r;
+    Service s(r);
+    UI ui(s);
+    ui.runConsole();
+    return 0;
 }
 
-/* CRUD Repo + tests, in service + tests, in UI */
+
 

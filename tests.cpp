@@ -57,6 +57,7 @@ void testBooks() {
 	author1 = nullptr;
 }
 
+
 void testRepo() {
 	char* author1 = new char[20];
 	char* author2 = new char[20];
@@ -113,5 +114,64 @@ void testRepo() {
 	author2 = nullptr;
 	delete[] author1;
 	author1 = nullptr;
-	
+}
+
+
+void testService() {
+	char* author1 = new char[20];
+	char* author2 = new char[20];
+	char* author3 = new char[20];
+	char* title1 = new char[30];
+	char* title2 = new char[30];
+	char* title3 = new char[30];
+	strcpy_s(author1, sizeof("Andrei"), "Andrei");
+	strcpy_s(author2, sizeof("Alex"), "Alex");
+	strcpy_s(author3, sizeof("Gabriel"), "Gabriel");
+	strcpy_s(title1, sizeof("Masina timpului"), "Masina timpului");
+	strcpy_s(title1, sizeof("Vrajitorul din Oz"), "Vrajitorul din Oz");
+	strcpy_s(title1, sizeof("Luceafarul"), "Luceafarul");
+	Book b1(1, author1, title1, 1992);
+	Book b2(2, author2, title2, 2001);
+	Book b3(3, author3, title3, 2012);
+	Repo<Book> repo;
+	Service s(repo);
+	s.addBook(1, author1, title1, 1992);
+	assert(s.getSize() == 1);
+	s.addBook(2, author2, title2, 2001);
+	assert(repo.getSize() == 2);
+	s.addBook(3, author3, title3, 2012);
+	assert(s.getSize() == 3);
+	assert(*s.readBook(3) == b3);
+	assert(*s.readBook(2) == b2);
+	assert(*s.readBook(1) == b1);
+	assert(s.readBook(4) == nullptr);
+	priority_queue<Book> result;
+	result = s.getAll();
+	assert(result.top() == b3);
+	result.pop();
+	assert(result.top() == b2);
+	result.pop();
+	assert(result.top() == b1);
+	result.pop();
+	assert(result.empty());
+	s.deleteBook(2);
+	assert(s.getSize() == 2);
+	s.deleteBook(4);
+	assert(s.getSize() == 2);
+	Book b4(4, author1, title2, 2014);
+	s.updateBook(1, 4, author1, title2, 2014);
+	result = s.getAll();
+	assert(result.top() == b4);
+	delete[] title3;
+	title3 = nullptr;
+	delete[] title2;
+	title2 = nullptr;
+	delete[] title1;
+	title1 = nullptr;
+	delete[] author3;
+	author3 = nullptr;
+	delete[] author2;
+	author2 = nullptr;
+	delete[] author1;
+	author1 = nullptr;
 }
