@@ -10,6 +10,9 @@ private:
 	void handleShowAll();
 	void handleUpdate();
 	void handleDelete();
+	void handleBorrow();
+	void handleReturn();
+	void handleSave();
 	void showMenu();
 public:
 	UI(Service& serv) : s(serv) {};

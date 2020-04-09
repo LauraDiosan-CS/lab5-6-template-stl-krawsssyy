@@ -39,15 +39,14 @@ void UI::handleShowID() {
 
 
 void UI::handleShowAll() {
-	priority_queue<Book> books = this->s.getAll();
-	stack<Book> show;
-	while (!books.empty()) {
-		show.push(books.top());
-		books.pop();
-	}
-	while (!show.empty()) {
-		cout << show.top() << endl;
-		show.pop();
+	stack< pair<Book, int> > showStack = this->s.getShowStack();
+	while (!showStack.empty()) {
+		pair<Book, int> t = showStack.top();
+		if (t.second != 0)
+			cout << t.first << " - IMPRUMUTATA" << endl;
+		else
+			cout << t.first << endl;
+		showStack.pop();
 	}
 	cout << endl;
 }
@@ -84,18 +83,54 @@ void UI::handleDelete() {
 	this->s.deleteBook(id);
 }
 
+
+void UI::handleBorrow() {
+	int idReader = 0;
+	cout << "Introduceti id-ul legitimatiei dvs = " << endl;
+	cin >> idReader;
+	int idBook = 0;
+	cout << "Introduceti id-ul cartii = " << endl;
+	cin >> idBook;
+	bool result = this->s.borrowBook(idReader, idBook);
+	if (!result)
+		cout << "Cartea nu se poate imprumuta" << endl;
+	else
+		this->s.deleteBook(idBook);
+}
+
+
+void UI::handleReturn() {
+	int idReader = 0;
+	cout << "Introduceti id-ul legitimatiei dvs = " << endl;
+	cin >> idReader;
+	int idBook = 0;
+	cout << "Introduceti id-ul cartii = " << endl;
+	cin >> idBook;
+	bool result = this->s.returnBook(idBook, idReader);
+	if (!result)
+		cout << "Cartea nu s-a putut inapoia!" << endl;
+}
+
+void UI::handleSave() {
+	this->s.saveToFile();
+}
+
+
 void UI::showMenu() {
 	cout << "1. Adaugare carte" << endl;
 	cout << "2. Afisare carte dupa id" << endl;
 	cout << "3. Afisare toate cartile" << endl;
 	cout << "4. Modificati o carte" << endl;
 	cout << "5. Stergeti o carte" << endl;
-	cout << "6. Iesire" << endl;
+	cout << "6. Imprumutati o carte" << endl;
+	cout << "7. Returnati o carte" << endl;
+	cout << "8. Salvati modificarile" << endl;
+	cout << "9. Iesire" << endl;
 }
 
 void UI::runConsole() {
 	char option = '0';
-	while (option != '6')
+	while (option != '9')
 	{
 		this->showMenu();
 		cout << endl;
@@ -119,6 +154,15 @@ void UI::runConsole() {
 			this->handleDelete();
 			break;
 		case '6':
+			this->handleBorrow();
+			break;
+		case '7':
+			this->handleReturn();
+			break;
+		case '8':
+			this->handleSave();
+			break;
+		case '9': 
 			break;
 		default:
 			cout << "Optiune invalida" << endl;

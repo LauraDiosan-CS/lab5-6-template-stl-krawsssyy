@@ -3,7 +3,7 @@
 using namespace std;
 
 template <class T> class Repo {
-private:
+protected:
 	priority_queue<T> entities;
 public:
 	Repo() { 
