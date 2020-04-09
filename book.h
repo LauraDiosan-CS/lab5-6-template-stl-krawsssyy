@@ -1,5 +1,6 @@
 #pragma once
 #include <ostream>
+#include <istream>
 using namespace std;
 
 class Book {
@@ -24,6 +25,7 @@ public:
 	Book& operator=(const Book& b);
 	bool operator==(const Book& b) const;
 	friend ostream& operator<<(ostream& os,const Book& b);
+	friend istream& operator>>(istream& is, Book& b);
 	bool operator<(const Book& b) const;
 	bool operator>(const Book& b) const;
 }; 

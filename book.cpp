@@ -82,13 +82,23 @@ bool Book::operator==(const Book& b) const {
 }
 
 ostream& operator<<(ostream& os, const Book& b) {
-	os << b.id << "/" << b.author << "/" << b.title << "/" << b.year;
+	os << b.id << " " << b.author << " " << b.title << " " << b.year;
 	return os;
 }
+
+istream& operator>>(istream& is, Book& b) {
+	char auth[20], title[30];
+	is >> b.id >> auth >> title >> b.year;
+	b.setAuthor(auth);
+	b.setTitle(title);
+	return is;
+}
+
 
 bool Book::operator<(const Book& b) const {
 	return this->year < b.year;
 }
+
 
 bool Book::operator>(const Book& b) const {
 	return this->year > b.year;
