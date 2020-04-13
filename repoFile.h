@@ -29,8 +29,7 @@ public:
 		if (this->FILE_NAME) {
 			ifstream is(FILE_NAME);
 			T elem;
-			while (!is.eof()) {
-				is >> elem;
+			while (is >> elem) {
 				this->addElement(elem);
 			}
 			is.close();

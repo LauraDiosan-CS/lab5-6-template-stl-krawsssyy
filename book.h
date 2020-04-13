@@ -9,12 +9,15 @@ private:
 	char* author;
 	char* title;
 	unsigned int year;
+	bool isBorrowed = false;
 	void setID(int id);
 public:
 	Book();
-	Book(int id, char* author, char* title, unsigned int year);
+	Book(int id, char* author, char* title, unsigned int year, bool isBorrowed = false);
 	Book(const Book& b);
 	~Book();
+	void changeBorrowState();
+	bool getBorrowState();
 	void setAuthor(char* author);
 	void setTitle(char* title);
 	void setYear(unsigned int year);

@@ -1,5 +1,5 @@
 #include "ui.h"
-#include<iostream>
+#include <iostream>
 #include <stack>
 using namespace std;
 
@@ -11,10 +11,10 @@ void UI::handleAdd() {
 	unsigned int year;
 	char a[20];
 	char t[30];
-	cout << "Introduceti id = "; cin >> id; cout << endl;
-	cout << "Introduceti autorul cartii = "; cin >> a; cout << endl;
-	cout << "Introduceti titlul cartii = "; cin >> t; cout << endl;
-	cout << "Introduceti anul aparitiei = "; cin >> year; cout << endl;
+	cout << "Introduceti id = "; cin >> id; cout << "\n";
+	cout << "Introduceti autorul cartii = "; cin >> a; cout << "\n";
+	cout << "Introduceti titlul cartii = "; cin >> t; cout << "\n";
+	cout << "Introduceti anul aparitiei = "; cin >> year; cout << "\n";
 	author = new char[strlen(a) + 1];
 	strcpy_s(author, strlen(a) + 1, a);
 	title = new char[strlen(t) + 1];
@@ -29,47 +29,51 @@ void UI::handleAdd() {
 
 void UI::handleShowID() {
 	int id;
-	cout << "Introduceti id = "; cin >> id; cout << endl;
+	cout << "Introduceti id = "; cin >> id; cout << "\n";
 	Book* result = this->s.readBook(id);
 	if (result != nullptr)
-		cout << *result << endl;
+		cout << *result << "\n";
 	else
-		cout << "Nu exista jucatorul cu acel id!" << endl;
+		cout << "Nu exista cartea cu acel id!" << "\n";
 }
 
 
 void UI::handleShowAll() {
-	stack< pair<Book, int> > showStack = this->s.getShowStack();
+	stack<Book> showStack = this->s.getShowStack();
 	while (!showStack.empty()) {
-		pair<Book, int> t = showStack.top();
-		if (t.second != 0)
-			cout << t.first << " - IMPRUMUTATA" << endl;
+		if (showStack.top().getBorrowState())
+			cout << showStack.top() << " - IMPRUMUTATA" << "\n";
 		else
-			cout << t.first << endl;
+			cout << showStack.top() << "\n";
 		showStack.pop();
 	}
-	cout << endl;
+	cout << '\n';
 }
 
 
 void UI::handleUpdate() {
 	int idOrig;
-	cout << "Introduceti id-ul = "; cin >> idOrig; cout << endl;
+	cout << "Introduceti id-ul = "; cin >> idOrig; cout << "\n";
 	int id;
 	char* author;
 	char* title;
 	unsigned int year;
 	char a[20];
 	char t[30];
-	cout << "Introduceti id = "; cin >> id; cout << endl;
-	cout << "Introduceti autorul cartii = "; cin >> a; cout << endl;
-	cout << "Introduceti titlul cartii = "; cin >> t; cout << endl;
-	cout << "Introduceti anul aparitiei = "; cin >> year; cout << endl;
+	cout << "Introduceti id = "; cin >> id; cout << "\n";
+	cout << "Introduceti autorul cartii = "; cin >> a; cout << "\n";
+	cout << "Introduceti titlul cartii = "; cin >> t; cout << "\n";
+	cout << "Introduceti anul aparitiei = "; cin >> year; cout << "\n";
+	int borrow = 0;
+	cout << "Introduceti 1 daca cartea este imprumutata, 0 altfel"; cin >> borrow;cout << "\n";
 	author = new char[strlen(a) + 1];
 	strcpy_s(author, strlen(a) + 1, a);
 	title = new char[strlen(t) + 1];
 	strcpy_s(title, strlen(t) + 1, t);
-	this->s.updateBook(idOrig, id, author, title, year);
+	if (borrow)
+		this->s.updateBook(idOrig, id, author, title, year, true);
+	else
+		this->s.updateBook(idOrig, id, author, title, year, false);
 	delete[] author;
 	author = nullptr;
 	delete[] title;
@@ -79,36 +83,35 @@ void UI::handleUpdate() {
 
 void UI::handleDelete() {
 	int id;
-	cout << "Introduceti id-ul = "; cin >> id; cout << endl;
+	cout << "Introduceti id-ul = "; cin >> id; cout << "\n";
 	this->s.deleteBook(id);
 }
 
 
 void UI::handleBorrow() {
 	int idReader = 0;
-	cout << "Introduceti id-ul legitimatiei dvs = " << endl;
+	cout << "Introduceti id-ul legitimatiei dvs = " << "\n";
 	cin >> idReader;
 	int idBook = 0;
-	cout << "Introduceti id-ul cartii = " << endl;
+	cout << "Introduceti id-ul cartii = " << "\n";
 	cin >> idBook;
 	bool result = this->s.borrowBook(idReader, idBook);
 	if (!result)
-		cout << "Cartea nu se poate imprumuta" << endl;
-	else
-		this->s.deleteBook(idBook);
+		cout << "Cartea nu se poate imprumuta" << "\n";
+
 }
 
 
 void UI::handleReturn() {
 	int idReader = 0;
-	cout << "Introduceti id-ul legitimatiei dvs = " << endl;
+	cout << "Introduceti id-ul legitimatiei dvs = " << "\n";
 	cin >> idReader;
 	int idBook = 0;
-	cout << "Introduceti id-ul cartii = " << endl;
+	cout << "Introduceti id-ul cartii = " << "\n";
 	cin >> idBook;
 	bool result = this->s.returnBook(idBook, idReader);
 	if (!result)
-		cout << "Cartea nu s-a putut inapoia!" << endl;
+		cout << "Cartea nu s-a putut inapoia!" << "\n";
 }
 
 void UI::handleSave() {
@@ -117,56 +120,122 @@ void UI::handleSave() {
 
 
 void UI::showMenu() {
-	cout << "1. Adaugare carte" << endl;
-	cout << "2. Afisare carte dupa id" << endl;
-	cout << "3. Afisare toate cartile" << endl;
-	cout << "4. Modificati o carte" << endl;
-	cout << "5. Stergeti o carte" << endl;
-	cout << "6. Imprumutati o carte" << endl;
-	cout << "7. Returnati o carte" << endl;
-	cout << "8. Salvati modificarile" << endl;
-	cout << "9. Iesire" << endl;
+	cout << "1. Adaugare carte" << "\n";
+	cout << "2. Adaugare client" << "\n";
+	cout << "3. Afisare carte dupa id" << "\n";
+	cout << "4. Afisare client dupa id" << "\n";
+	cout << "5. Afisare toate cartile" << "\n";
+	cout << "6. Afisare toti clientii" << "\n";
+	cout << "7. Modificati o carte" << "\n";
+	cout << "8. Modificati un client" << "\n";
+	cout << "9. Stergeti o carte" << "\n";
+	cout << "10. Stergeti un client" << "\n";
+	cout << "11. Imprumutati o carte" << "\n";
+	cout << "12. Returnati o carte" << "\n";
+	cout << "13. Salvati modificarile" << "\n";
+	cout << "x. Iesire" << "\n";
 }
 
 void UI::runConsole() {
-	char option = '0';
-	while (option != '9')
+	string option = "0";
+	while (option != "x")
 	{
 		this->showMenu();
-		cout << endl;
+		cout << "\n";
 		cin >> option;
-		cout << endl;
-		switch (option)
-		{
-		case '1':
+		cout << "\n";
+		if(option == "1")
 			this->handleAdd();
-			break;
-		case '2':
+		if (option == "2")
+			this->handleAddClient();
+		if (option == "3")
 			this->handleShowID();
-			break;
-		case '3':
+		if (option == "4")
+			this->handleShowClientID();
+		if (option == "5")
 			this->handleShowAll();
-			break;
-		case '4':
+		if (option == "6")
+			this->handleShowAllClients();
+		if (option == "7")
 			this->handleUpdate();
-			break;
-		case '5':
+		if (option == "8")
+			this->handleUpdateClient();
+		if (option == "9")
 			this->handleDelete();
-			break;
-		case '6':
+		if (option == "10")
+			this->handleDeleteClient();
+		if (option == "11")
 			this->handleBorrow();
-			break;
-		case '7':
+		if (option == "12")
 			this->handleReturn();
-			break;
-		case '8':
+		if (option == "13")
 			this->handleSave();
+		if (option == "x")
 			break;
-		case '9': 
-			break;
-		default:
-			cout << "Optiune invalida" << endl;
-			break;
-		}
 	}
+}
+
+void UI::handleAddClient() {
+	int id;
+	cout << "Introduceti id-ul = "; cin >> id; cout << "\n";
+	char name[20];
+	cout << "Introduceti numele = "; cin >> name; cout << "\n";
+	char* real = new char[strlen(name) + 1];
+	strcpy_s(real, strlen(name) + 1, name);
+	this->s.addClient(id, real);
+	delete[] real;
+	real = nullptr;
+}
+
+void UI::handleShowClientID() {
+	int id;
+	cout << "Introduceti id-ul = "; cin >> id; cout << "\n";
+	Client* result = this->s.readClient(id);
+	if (result)
+		cout << result << "\n";
+	else
+		cout << "Clientul cu id-ul respectiv nu exista" << "\n";
+}
+
+void UI::handleShowAllClients() {
+	stack<Client> show = this->s.getClientsStack();
+	while (!show.empty()) {
+		cout << show.top() << "\n";
+		show.pop();
+	}
+}
+
+void UI::handleUpdateClient() {
+	int idOrig;
+	cout << "Introduceti id-ul original = "; cin >> idOrig; cout << "\n";
+	int id;
+	cout << "Introduceti id-ul = "; cin >> id; cout << "\n";
+	char name[20];
+	cout << "Introduceti numele = "; cin >> name; cout << "\n";
+	int borrow = 0;
+	cout << "Introduceti 1 daca a imprumutat carti si 0 daca nu = "; cin >> borrow; cout << "\n";
+	if (borrow) {
+		cout << "Introduceti numarul de carti imprumutate = ";
+		int size;
+		cin >> size;
+		cout << "\n";
+		cout << " Introduceti id-urile cartilor imprumutate = ";
+		vector<int> vect;
+		for (int i = 0; i < size; i++)
+		{
+			int x;
+			cin >> x;
+			cout << "\n";
+			vect.emplace_back(x);
+		}
+		this->s.updateClient(idOrig, id, name, true, vect);
+	}
+	else
+		this->s.updateClient(idOrig, id, name, false, vector<int>());
+}
+
+void UI::handleDeleteClient() {
+	int id;
+	cout << "Introduceti id-ul = "; cin >> id; cout << "\n";
+	this->s.deleteClient(id);
 }

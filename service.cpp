@@ -1,10 +1,8 @@
 #include "service.h"
 
 
-Service::Service(repoFile<Book>& repo,const char* borrowFile) : r(repo) {
-	this->borrowFile = new char[strlen(borrowFile) + 1];
-	strcpy_s(this->borrowFile, strlen(borrowFile) + 1, borrowFile);
-	this->loadBorrowStack();
+Service::Service(repoFile<Book>& repoBook, repoFile<Client>& repoClient) : r(repoBook), rClient(repoClient) {
+	;
 }
 
 
@@ -24,8 +22,8 @@ Book* Service::readBook(int id) {
 }
 
 
-void Service::updateBook(int idOrig, int id, char* author, char* title, unsigned int year) {
-	Book b(id, author, title, year);
+void Service::updateBook(int idOrig, int id, char* author, char* title, unsigned int year, bool isBorrowed) {
+	Book b(id, author, title, year, isBorrowed);
 	this->r.updateEntity(idOrig, b);
 }
 
@@ -42,96 +40,84 @@ size_t Service::getSize() {
 
 bool Service::borrowBook(int idReader, int idBook) {
 	Book* result = this->readBook(idBook);
-	if (result) {
-		this->borrowStack.push(std::make_pair(*result, idReader));
+	Client* resultClient = this->readClient(idReader);
+	if (result && resultClient) {
+		if (resultClient->getClientBorrowState() ==  false)
+			resultClient->changeBorrow();
+		resultClient->addBorrow(result->getID());
+		this->rClient.updateEntity(resultClient->getID(), *resultClient);
+		result->changeBorrowState();
+		this->r.updateEntity(result->getID(), *result);
 		return true;
 	}
 	return false;
 }
 
 
-stack< pair<Book, int> > Service::getBorrowStack() {
-	return this->borrowStack;
-}
 
-
-stack< pair<Book, int> > Service::getShowStack() {
+stack<Book> Service::getShowStack() {
 	priority_queue<Book> books = this->getAll();
-	stack< pair<Book, int> > borrowStack = this->getBorrowStack();
-	priority_queue< pair<Book, int> > auxQueue;
-	while (!borrowStack.empty()) {
-		auxQueue.push(borrowStack.top());
-		borrowStack.pop();
-	}
+	stack<Book> showStack;
 	while (!books.empty()) {
-		auxQueue.push(std::make_pair(books.top(), 0));
+		showStack.push(books.top());
 		books.pop();
-	}
-	stack< pair<Book, int> > showStack;
-	while (!auxQueue.empty()) {
-		showStack.push(auxQueue.top());
-		auxQueue.pop();
 	}
 	return showStack;
 }
 
 bool Service::returnBook(int idBook, int idReader) {
-	stack< pair<Book, int> > borrowStackz = this->getBorrowStack();
-	int ok = 0;
-	while (!borrowStackz.empty()) {
-		pair<Book, int> t = borrowStackz.top();
-		if (t.first.getID() == idBook and t.second == idReader)
-			ok = 1;
-		borrowStackz.pop();
-	}
-	if (ok == 0)
-		return false;
-	else {
-		stack< pair<Book, int> > rest;
-		while (!this->borrowStack.empty()) {
-			pair<Book, int> t = borrowStack.top();
-			if (t.first.getID() != idBook)
-				rest.push(t);
-			else
-				this->r.addElement(t.first);
-			borrowStack.pop();
-		}
-
-		while (!rest.empty()) {
-			borrowStack.push(rest.top());
-			rest.pop();
-		}
+	Book* result = this->readBook(idBook);
+	Client* resultClient = this->readClient(idReader);
+	if (result && resultClient) {
+		result->changeBorrowState();
+		this->r.updateEntity(result->getID(), *result);
+		if (resultClient->getClientBorrowedIDs().size())
+			resultClient->removeBorrow(idBook);
+		if (resultClient->getClientBorrowedIDs().size() == 0)
+			resultClient->changeBorrow();
+		this->rClient.updateEntity(resultClient->getID(), *resultClient);
 		return true;
 	}
-
+	return false;
 }
 
 void Service::saveToFile() {
 	this->r.saveToFile();
-	if (this->borrowFile)
-	{
-		ofstream os(this->borrowFile);
-		stack< pair<Book, int> > rez = this->borrowStack;
-
-		while (!rez.empty()) {
-			os << rez.top().first << " " << rez.top().second << endl;
-			rez.pop();
-		}
-		os.close();
-	}
+	this->rClient.saveToFile();
 }
 
-void Service::loadBorrowStack() {
-	while (!this->borrowStack.empty())
-		borrowStack.pop();
-	if (this->borrowFile) {
-		ifstream is(borrowFile);
-		Book elem;
-		int id;
-		while (!is.eof()) {
-			is >> elem >> id;
-			this->borrowStack.push(std::make_pair(elem, id));
-		}
-		is.close();
+void Service::addClient(int id, char* name) {
+	Client c(id, name);
+	this->rClient.addElement(c);
+}
+
+priority_queue<Client> Service::getClients() {
+	return this->rClient.getAll();
+}
+
+Client* Service::readClient(int id) {
+	return this->rClient.readEntity(id);
+}
+
+void Service::updateClient(int idOrig, int id, char* name, bool hasBorrowed, vector<int> borrowed) {
+	Client c(id, name, hasBorrowed, borrowed);
+	this->rClient.updateEntity(idOrig, c);
+}
+
+void Service::deleteClient(int id) {
+	this->rClient.deleteEntity(id);
+}
+
+size_t Service::getClientsSize() {
+	return this->rClient.getSize();
+}
+
+stack<Client> Service::getClientsStack() {
+	priority_queue<Client> clients = this->rClient.getAll();
+	stack<Client> showStack;
+	while (!clients.empty()) {
+		showStack.push(clients.top());
+		clients.pop();
 	}
+	return showStack;
 }
