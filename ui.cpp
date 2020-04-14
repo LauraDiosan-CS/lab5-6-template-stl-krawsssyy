@@ -226,12 +226,29 @@ void UI::handleUpdateClient() {
 			int x;
 			cin >> x;
 			cout << "\n";
-			vect.emplace_back(x);
+			Book* result = this->s.readBook(x);
+			Client* resultC = this->s.readClient(idOrig);
+			vector<int> v = resultC->getClientBorrowedIDs();
+			if (result->getBorrowState()) {
+				if (std::find(v.begin(), v.end(), x) == v.end())
+					cout << "Nu puteti imprumuta acea carte" << "\n";
+				else
+					cout << "Ati imprumutat deja aceasta carte" << "\n", vect.emplace_back(x);
+			}
+			else
+				result->changeBorrowState(), this->s.updateBook(result->getID(), result->getID(), result->getAuthor(), result->getTitle(), result->getYear(), result->getBorrowState()), vect.emplace_back(x);
 		}
 		this->s.updateClient(idOrig, id, name, true, vect);
 	}
 	else
+	{
+		Client* rez = this->s.readClient(idOrig);
+		vector<int> ve = rez->getClientBorrowedIDs();
+		if (ve.size())
+			for (int i = 0; i < ve.size(); i++)
+				this->s.returnBook(ve[i], idOrig);
 		this->s.updateClient(idOrig, id, name, false, vector<int>());
+	}
 }
 
 void UI::handleDeleteClient() {

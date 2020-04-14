@@ -5,6 +5,7 @@ Client::Client() {
 	this->id = 0;
 	this->name = nullptr;
 	this->hasBorrowed = false;
+	this->borrowedIDs.reserve(100);
 }
 
 Client::Client(int id, char* name, bool hasBorrowed, const vector<int>& borrowedIDs) {
@@ -13,7 +14,7 @@ Client::Client(int id, char* name, bool hasBorrowed, const vector<int>& borrowed
 	strcpy_s(this->name, strlen(name) + 1, name);
 	this->hasBorrowed = hasBorrowed;
 	if(borrowedIDs.begin() != borrowedIDs.end())
-		copy(borrowedIDs.begin(), borrowedIDs.end(), back_inserter(this->borrowedIDs));
+		this->borrowedIDs.reserve(borrowedIDs.size()), copy(borrowedIDs.begin(), borrowedIDs.end(), back_inserter(this->borrowedIDs));
 
 }
 
@@ -23,7 +24,7 @@ Client::Client(const Client& c) {
 	strcpy_s(this->name, strlen(c.name) + 1, c.name);
 	this->hasBorrowed = c.hasBorrowed;
 	if (c.borrowedIDs.size()) {
-		this->borrowedIDs.resize(c.borrowedIDs.size());
+		this->borrowedIDs.reserve(borrowedIDs.size());
 		copy(c.borrowedIDs.begin(), c.borrowedIDs.end(), back_inserter(this->borrowedIDs));
 	}
 }
